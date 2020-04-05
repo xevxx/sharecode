@@ -1,0 +1,224 @@
+﻿@viewModel GeoAppBuilder.ViewModels.DashboardViewModel, GeoAppBuilder
+@masterPage Views/Site.dotmaster
+
+<dot:Content ContentPlaceHolderID="HeadContent">
+    <style>
+        .bannerSection {
+            padding: 60px 0 120px;
+        }
+        .bgSoftBlue {
+            background-color: #f2f6f9;
+        }
+        .h4-icon {
+            font-size: 1.5rem !important;
+        }
+        
+    </style>
+
+</dot:Content>
+<dot:Content ContentPlaceHolderID="MainContent">
+    <div ID="">
+        <dot:RequiredResource Name="magnificPopupcss"></dot:RequiredResource>
+        <dot:RequiredResource Name="magnificPopup"></dot:RequiredResource>
+        <%--<dot:RequiredResource Name="bxSliderCss"></dot:RequiredResource>
+        <dot:RequiredResource Name="bxSlider"></dot:RequiredResource>--%>
+        <%--<dot:RequiredResource Name="textFill"></dot:RequiredResource>--%>
+        <dot:RequiredResource Name="home"></dot:RequiredResource>
+
+        <div class="d-none">
+
+
+
+            <div class="d-none-xs col-sm-12">
+                <a href="http://www.eucompni.gov.uk/" target="OpenEUcompNIwindow">
+                    <div align="left">
+                        <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="./images/Landscape_Colour_PNG.PNG" class="lazyload" style="        width: 170px
+" />
+                    </div>
+                </a>
+
+
+                <p style="text-align: left">Project part financed by the Investment for Growth and Jobs Programme for Northern Ireland co financed by the European Regional Development Fund.</p>
+            </div>
+        </div>
+
+
+
+
+        <div class="bannerSection">
+            <div ID="userMapsRecent" class="container oAuto">
+
+
+                <div class="col-xs-12">
+                    <h4 ID="myMapsTitle"><bp:FAIcon class="h4-icon"  Icon="ClockRegular"></bp:FAIcon> Recent</h4>
+                </div>
+
+
+
+                <div class="myMapsBxSlider NotVisible">
+                    <dot:Repeater ID="rptUserMapsRecent" DataSource="{value: MapsGrd}" SelectedValues="{value: SelectedMap}>
+                        <ItemTemplate>
+                            <div class="col-xs-12 col-sm-6 col-md-4 no-gutter imgGrid myMapsGrid">
+                                <div class="col-xs-12 imgGrid-li no-gutter">
+                                    <div class="imgGrid-cell ver-bottom-1 hor-right-0-5">
+
+                                        <a href="{value:  "MemberPages/Default.aspx?MapId=" + MapId}" target="_blank">
+                                            <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+                                                 Class="{value: "updateImg imgGrid-img lazyload"}" data-src="{value: MapImage}" OnError="ImgMyMapsError(this)" />
+                                        </a>
+                                        <span class="imgGrid-overlay myImgGrid-overlay"></span>
+                                        <div class="imgGrid-text myImgGrid-text">
+                                            <div class="">
+                                                <strong>
+                                                    <label Class="">Map Name: </label>
+                                                </strong>
+                                                <dot:Literal Class="" Text='{value:  MapName}'></dot:Literal>
+                                            </div>
+                                            <div class="">
+                                                <strong>
+                                                    <label Class="">Updated: </label>
+                                                </strong>
+                                                <dot:Literal Class="" Text="{value: TimeSpan}"></dot:Literal>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </ItemTemplate>
+                    </dot:Repeater>
+
+                </div>
+                <div class="col-sm-12">
+                    <div ID="pageBxSlider" class="text-center col-sm-6 col-sm-offset-3 ver-top-0-5 d-none">
+                        <input type="image" ID="firstBtn" src="/images/first2.png" class="iconSize" onclick="GoToFirst(); return false;" />
+                        <input type="image" ID="previousBtn" src="/images/previous2.png" class="iconSize" onclick="GoToPrevious(); return false;" />
+                        <%--<input type="text" id="goToTextBox" class="form-control goToBtn" />--%>
+                        <label ID="pagerDiv" class="pagerDiv" onclick="GoToPopUp();"></label>
+                        <input type="image" ID="nextBtn" src="/images/next2.png" class="iconSize" onclick="GoToNext(); return false;" />
+                        <input type="image" ID="lastBtn" src="/images/last2.png" class="iconSize" onclick="GoToLast(); return false;" />
+                    </div>
+                    <div ID="pageBxBtn" class="text-center col-sm-6 col-sm-offset-3">
+                        <!--<input type="button" id="goToBtn" class="btn btn-sm btn-primary" value="GoTo" />-->
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    
+
+        <div class="bgSoftBlue bannerSection">
+            <div class="container">
+                <div class="flex justify-content-between">
+                    <div class="h4"><bp:FAIcon class="h4-icon" Icon="MapRegular"></bp:FAIcon> Your Maps</div>
+
+                    <dot:Button ButtonTagName="button" Visible="{value: UserCanCreateMapsAndIsNotZero}" Enabled="{value: UserCanCreateMapsAndIsNotZero}" class="btn btn-success floatRight" Click="{command: OpenCreateMapDialog()}">Create New Map</dot:Button>
+                </div>
+                <cc:MapListControl DataContext="{value:  MapList}" />
+
+                <a href="/MemberPages/customerMapPortal.aspx" class="btn btn-link" Visible="{value: MapList.MapList_MapsList.Items.Count > MapList.MapList_PageSize}">Click to all of your maps</a>
+            </div>
+        </div>
+
+        <div class="bannerSection">
+            <div ID="publicMaps" class="container">
+
+                <div class="">
+                    <div class="col-xs-12">
+                        <h4>Trending Community Maps</h4>
+                    </div>
+                    <dot:Repeater ID="rptPublic" DataSource="{value: MapsGrdPublic}" SelectedValues="{value: SelectedMapPublic}>
+                        <ItemTemplate>
+                            <div class="col-xs-6 col-sm-6 col-md-3 no-gutter imgGrid">
+                                <div class="col-xs-12 imgGrid-li no-gutter">
+                                    <div class="imgGrid-cell ver-bottom-0-5 hor-right-0-5">
+
+                                        <a href="#" target="_blank" onclick="{value:  "MagnificOpenRep(\"PublicPages/IframeDefault.aspx?MapId=" + MapId}">
+                                            <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="{value: "updateImg imgGrid-img lazyload"}" data-src="{value: MapThumb}" OnError="ImgMyMapsError(this)" />
+                                        </a>
+                                        <%-- <div class="col-xs-12 headerHeight smallFont">  --%>
+                                        <span class="imgGrid-overlay"></span>
+                                        <div class="imgGrid-text">
+                                            <strong>
+                                                <label Class="">Map Name: </label>
+                                            </strong>
+                                            <dot:Literal Text="{value: MapName}" Class=""></dot:Literal>
+                                        </div>
+                                    </div>
+                                    <%-- </div>--%>
+                                </div>
+                            </div>
+                        </ItemTemplate>
+                    </dot:Repeater>
+                </div>
+            </div>
+        </div>
+        
+
+
+
+        <div ID="GoToPopUp" class="d-none">
+            <div class="col-xs-12">
+                <input type="text" ID="pageNum" placeholder="Page Number" class="form-control goToBtn" />
+            </div>
+            <div class="col-xs-12">
+                <input type="button" ID="goToSearchBtn" value="Go To" class="btn btn-sm btn-primary pull-right ver-top-0-5 col-xs-12" onclick="GoToPage();" />
+            </div>
+        </div>
+
+
+        <div ID="AddLayer" title="Add Layer">
+           
+            <%--<cc:AddMapControl DataContext="{value:  AddMap}" />--%>
+
+        </div>
+
+
+
+
+
+
+        <script>
+            var mySlider = null;
+            function ImgMyMapsError(image) {
+                image.onerror = "";
+                image.src = "/images/Generating.png";
+                return true;
+            }
+            $(document).ready(function () {
+                dotvvm.events.init.subscribe(docReady);
+            });
+            var docReady = function () {
+
+                //var prm = Sys.WebForms.PageRequestManager.getInstance();
+                //prm.add_initializeRequest(InitializeRequest);
+                //prm.add_endRequest(EndRequest);
+
+                //SetMapHeights();
+                //StartBxSlider();
+                var vm = dotvvm.viewModels.root.viewModel;
+                //OnOffBxSlider(vm.MapCount());
+                function InitializeRequest(sender, args) {
+
+                }
+
+                function EndRequest(sender, args) {
+                    //  SetMapHeights();
+                    //    RemovePanelHeights();
+                }
+
+                // show my maps when not using bxslider
+                var mymaps = $('.myMapsGrid');
+                if (mymaps.length < 5)
+                    $('.myMapsBxSlider').removeClass('NotVisible');
+            };
+
+        </script>
+    </div>
+
+    <script>
+   
+    </script>
+</dot:Content>
+
