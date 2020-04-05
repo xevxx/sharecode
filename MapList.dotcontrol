@@ -1,0 +1,355 @@
+﻿@viewModel GeoAppBuilder.ViewModels.MapListControlViewModel, GeoAppBuilder
+<style>
+    $table-header: #1976D2;
+    $table-header-border: #1565C0;
+    $table-border: #d9d9d9;
+    $row-bg: #f4f2f1;
+
+    div {
+        box-sizing: border-box;
+    }
+
+    .table-container {
+        display: block;
+        margin: 2em auto;
+        width: 90%;
+        max-width: 1080px;
+    }
+
+    .flag-icon {
+        margin-right: 0.1em;
+    }
+
+    .flex-table {
+        display: flex;
+        flex-flow: row wrap;
+        border-left: solid 1px $table-border;
+        transition: 0.5s;
+        &:first-of-type
+
+    {
+        border-top: solid 1px $table-header-border;
+        border-left: solid 1px $table-header-border;
+    }
+
+    &:first-of-type .flex-row {
+        background: $table-header;
+        color: white;
+        border-color: $table-header-border;
+    }
+
+    &.row:nth-child(odd) .flex-row {
+        background: $row-bg;
+    }
+
+    &:hover {
+        background: #F5F5F5;
+        transition: 500ms;
+    }
+
+    }
+
+    .flex-row {
+        width: calc(100% / 6);
+        text-align: center;
+        padding: 0.5em 0.5em;
+        border-right: solid 1px $table-border;
+        border-bottom: solid 1px $table-border;
+    }
+
+    .flex-width-10 {
+        width: 10%;
+        min-width: 50px;
+    }
+
+    .flex-width-20 {
+        width: 20%;
+        min-width: 100px;
+    }
+
+    .flex-width-40 {
+        width: 40%;
+        min-width: 150px;
+    }
+    /*.flex-row :fourth-child {
+        width: 150px;
+    }*/
+
+    .rowspan {
+        display: flex;
+        flex-flow: row wrap;
+        align-items: flex-start;
+        justify-content: center;
+    }
+
+    .column {
+        display: flex;
+        flex-flow: column wrap;
+        width: 75%;
+        padding: 0;
+        .flex-row
+
+    {
+        display: flex;
+        flex-flow: row wrap;
+        width: 100%;
+        padding: 0;
+        border: 0;
+        border-bottom: solid 1px $table-border;
+        &:hover
+
+    {
+        background: #F5F5F5;
+        transition: 500ms;
+    }
+
+    }
+    }
+
+    .flex-cell {
+        width: calc(100% / 3);
+        //1px = border right text-align: center;
+        padding: 0.5em 0.5em;
+        border-right: solid 1px $table-border;
+        //flex: 1 1 33.3%;
+        &:last-child
+
+    {
+        // border-right: 0;
+    }
+
+    }
+
+    @media all and (max-width: 767px) {
+        .flex-row {
+            width: calc(100% / 3);
+            //1px = border right &.first
+
+    {
+        width: 100%;
+    }
+
+    }
+
+    .column {
+        width: 100%;
+    }
+
+    }
+
+    @media all and (max-width: 430px) {
+
+        .flex-table {
+            .flex-row
+
+    {
+        border-bottom: 0;
+    }
+
+    .flex-row:last-of-type {
+        border-bottom: solid 1px $table-border;
+    }
+
+    }
+
+    .header {
+        .flex-row
+
+    {
+        border-bottom: solid 1px;
+    }
+
+    }
+
+    .flex-row {
+        width: 100%;
+        //1px = border right &.first
+
+    {
+        width: 100%;
+        border-bottom: solid 1px $table-border;
+    }
+
+    }
+
+    .column {
+        width: 100%;
+        .flex-row
+
+    {
+        border-bottom: solid 1px $table-border;
+    }
+
+    }
+
+    .flex-cell {
+        width: 100%;
+        //1px = border right
+    }
+
+    .hoverDisplay {
+        display: none;
+    }
+
+    .flex-table row:hover + .hoverDisplay {
+        display: block;
+    }
+
+    }
+
+    .hoverDisplay {
+        opacity: 0;
+        /*animation: fadeOut ease 1s;
+        -webkit-animation: fadeOut ease 1s;
+        -moz-animation: fadeOut ease 1s;
+        -o-animation: fadeOut ease 1s;
+        -ms-animation: fadeOut ease 1s;*/
+    }
+
+    .hoverParent:hover .hoverDisplay {
+        opacity: 1;
+        transition: opacity 1s;
+    }
+
+    .quick-action-stay-on {
+        opacity: 1 !important;
+    }
+</style>
+
+<dot:Repeater ID="lvCurrentMaps" SelectedValues="{value: MapList_SelectedMap}" DataSource="{value: MapList_MapsList}">
+    <div class="table-container" role="table" aria-label="Maps">
+        <div class="flex-table borAddressBottom" role="rowgroup">
+            <div class="flex-row first flex-width-50" class-d-none="{value: _root.NoSelect}" role="columnheader">Select</div>
+            <div class="flex-row flex-width-10" Class-first="{value: _root.NoSelect}" role="columnheader"></div>
+            <div class="flex-row flex-width-10" class-d-none="{value: _root.NoSelect}" role="columnheader">Id</div>
+            <div class="flex-row flex-width-40" role="columnheader">Information</div>
+            <div class="flex-row" role="columnheader">Updated</div>
+        </div>
+        <RowTemplate>
+
+
+
+            <div class="flex-table row hoverParent" class-borAddressBottom="{value: _collection.Index != _root.MapList_MapsList.Items.Count -1}" role="rowgroup">
+                <div class="chkbox text-center flex-row first" class-d-none="{value: _root.NoSelect}" role="cell">
+                    <input ID="chkbxDelete" type="checkbox" value="{value: MapId}" class="chk checkmiddlem" />
+                </div>
+                <div class="flex-row flex-width-10" Class-first="{value: _root.NoSelect}" role="cell" onclick="{value: MapId}" style="cursor:pointer !important" title="Click to view map">
+                    <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+                         Class="{value: "fillImg popovers lazyload GeneratingImage fullWidth"}" data-src="{value: MapThumb}" />
+                </div>
+                <div class="flex-row flex-width-10" class-d-none="{value: _root.NoSelect}" role="cell" onclick="{value: MapId}" style="cursor:pointer !important" title="Click to view map">
+                    <dot:Literal ID="Label3" Text="{value: MapId}"></dot:Literal>
+                </div>
+
+                <div class="flex-row flex-width-40" role="cell" onclick="{value: MapId}" style="cursor:pointer !important" title="Click to view map">
+                    <div>
+                        <dd><dot:Literal ID="lblMapNameValue" Text="{value: MapName}" /></dd>
+                        <dd class="small"><dot:Literal ID="Label6" Text="{value: MapDesc}" /></dd>
+                        <dd class="small">
+                            <dot:Literal ID="Label7" Text="{value: MapLayersCount}"
+                                         data-toggle="popover" title="Current Map Layers" data-content="{value: MapLayers}"
+                                         CssClass="bold text-info layerPopover"></dot:Literal>
+                        </dd>
+                    </div>
+                </div>
+                <div class="flex-row" role="cell" data-order="{value: DateMili}" onclick="{value: MapId}" style="cursor:pointer !important" title="Click to view map">
+                    <dot:Literal Text="{value:  TimeSpan}"></dot:Literal>
+                </div>
+                <div class="flex-row" role="cell" onclick="{value: MapId}" style="cursor:pointer !important" title="Click to view map">
+                    <bs:Popover class="quickActionPopover" Title="{value: "<div class='text-center'> Quick Actions</div>"}" Content=""
+                                Trigger="Click" AllowHtmlInTitleAndContent="true">
+                        <PopoverTemplate>
+                            <div class="popover" role="tooltip">
+                                <div class="arrow"></div>
+                                <div class="popover-header"></div>
+                                <div class="popover-body"></div>
+                                <div><dot:button class='btn btn-link' click="{command: _parent.EnableEditMapNameDesc()}">Edit Name & Description</dot:button></div>
+                                <div><a class='btn btn-link' href='#'>Edit full configuration</a></div>
+                                <div><a class='btn btn-link' href='#'>Change privacy</a></div>
+                                <div><a class='btn btn-link' href='#'>Duplicate</a></div>
+                                <div><a class='btn btn-link text-danger' href='#'>Delete</a></div>
+                            </div>
+                        </PopoverTemplate>
+                        <button type="button" onclick="{value: "OnEdit(this, " + MapId + ")"}" class="btn btn-link hoverDisplay" data-toggle="tooltip" Title="Click to edit map">
+                            <img src="/images/btn_edit_blueButton.png" />
+                        </button>
+                    </bs:Popover>
+                </div>
+            </div>
+
+        </RowTemplate>
+    </div>
+
+</dot:Repeater>
+
+
+
+<bs:ModalDialog IsDisplayed="{value: MapList_Displayed}">
+    <HeaderTemplate>
+        Edit Map name & description
+        <bs:CloseButton />
+    </HeaderTemplate>
+    <ContentTemplate>
+        <dot:Literal ID="lblMapName" Text="Map Name" />
+        <dot:TextBox ID="tbMapName" Text="{value: MapList_MapName}" class="form-control fullWidth"></dot:TextBox>
+        <br />
+        <dot:Literal ID="lblMapDesc" Text="Map Description" />
+        <dot:TextBox ID="tbMapDesc" Text="{value: MapList_MapDesc}" Rows="3" TextMode="MultiLine" class="form-control fullWidth"></dot:TextBox>
+        <dot:Validator ID="{value: MapList_MapName}"></dot:Validator>
+
+
+    </ContentTemplate>
+    <FooterTemplate>
+
+        <div class="ver-top-0-5 float-right">
+            <%--<dot:LinkButton ID="LbtnAdvancedMap" class="btn" Text="Advanced" Click="{command: OpenAdvancedMap1()}"></dot:LinkButton>
+            <dot:Button ID="btnNewMap" class="btn-success btn hor-right-1" Text="Save" Click="{command: NewMap1()}" />--%>
+        </div>
+    </FooterTemplate>
+</bs:ModalDialog>
+
+
+
+<script type="text/javascript">
+
+
+    //run on ready
+    $(function () {
+        // click enter on either textbox to submit
+        $$("tbMapName").keydown(function (event) {
+            if (event.keyCode == 13) {
+                $$("btnNewMap").click();
+            }
+        });
+        $$("tbMapDesc").keydown(function (event) {
+            if (event.keyCode == 13) {
+                $$("btnNewMap").click();
+            }
+        });
+    });
+
+</script>
+
+<script>
+    function OnEdit(element, mapId) {
+        var ele = $(element);
+        if (ele.hasClass("quick-action-stay-on")) {
+            ele.removeClass("quick-action-stay-on");
+
+        } else {
+            ele.addClass("quick-action-stay-on");
+        }
+        //$('.quickActionPopover').attr("Content", $('#quickActions').html());
+    }
+    $('html').on('click', function (e) {
+        if (!$(e.target).parent().hasClass('quick-action-stay-on') && !$(e.target).is($("[class^='popover']"))) {
+            if ($(".quick-action-stay-on").length > 0) {
+                $(".quick-action-stay-on").popover("hide");
+                $(".quick-action-stay-on").removeClass("quick-action-stay-on");
+            }
+
+        }
+
+    });
+</script>
+
