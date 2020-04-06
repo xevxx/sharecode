@@ -1,0 +1,516 @@
+﻿@viewModel GeoAppBuilder.ViewModels.SiteViewModel, GeoAppBuilder
+
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head ID="Head1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta charset="UTF-8" />
+    <title>Azimap</title>
+
+    <link rel="shortcut icon" href="/img/azimapNew.ico" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <dot:RequiredResource Name="azimapsmcssbs4" />
+    <dot:RequiredResource Name="azimapsmbs4" />
+
+    <%--<link href="/dist/azimapsm.css" rel="stylesheet" />
+    <script src="/dist/azimapsm.js"></script>--%>
+
+    <dot:ContentPlaceHolder ID="HeadContent">
+        <dot:Literal ID="litDarkCss"></dot:Literal>
+    </dot:ContentPlaceHolder>
+
+
+    
+
+    <link rel="canonical" href="https://azimuth.azimap.com" />
+</head>
+<body style="height:100%; position:relative; padding:0; margin:0;">
+    <script type="text/javascript">
+
+        var privacy_timeout = 0;
+        var privacy_functions = [];
+
+        var mallon_privacy = document.getElementById('mallon_privacy');
+        var results = document.cookie.match('(^|;) ?mallon_privacy=([^;]*)(;|$)');
+        if (results) {
+            if (1 == unescape(results[2])) {
+                privacy_accept();
+            }
+        } else {
+            window.onload = function () {
+                for (var i = 0; i < document.links.length; i++) {
+                    var link_href = document.links[i].getAttribute('href');
+                    if ('privacy' != document.links[i].getAttribute('rel') && (!/^[\w]+:/.test(link_href) || (new RegExp('^[\\w]+://[\\w\\d\\-\\.]*' + window.location.host)).test(link_href))) {
+                        var current_onclick = document.links[i].onclick;
+                        document.links[i].onclick = function () { privacy_accept(); if (Object.prototype.toString.call(current_onclick) == '[object Function]') { current_onclick(); } };
+                    }
+                }
+            };
+        }
+
+        // fixes mobile view log in/ log out label
+        window.onload = function () {
+            // change log out to log in etc
+            if (window.outerWidth < 970) {
+                var loggedInStatus = "<img src='/images/Logout.png'>Log Out";
+                var loggedOutStatus = "<img src='/images/Logout.png'>Log In";
+                if (divMobileLoginUser.innerHTML != "") {
+                    document.getElementById('LinkButton1').innerHTML = loggedInStatus;
+                } else {
+                    document.getElementById('LinkButton1').innerHTML = loggedOutStatus;
+                }
+            }
+        };
+
+        function FixHeaderForIE() {
+            //Only browsers other than Internet Explorer can handle the .svg header logo (AZI-3063)
+            var ua = window.navigator.userAgent;
+            var msie = ua.indexOf("MSIE ");
+
+            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))  // If IE
+            {
+
+            }
+            else {
+                document.getElementById("logosrc").src = "/img/ApplicationLogo.svg";
+            }
+        }
+
+
+        var privacy_timer;
+        if (privacy_timeout > 0) {
+            privacy_timer = setTimeout('privacy_tick()', 1000);
+        } else {
+            var privacy_wait = document.getElementById('privacy_wait');
+            if (null != privacy_wait) {
+                privacy_wait.parentNode.removeChild(privacy_wait);
+            }
+        }
+        function privacy_tick() {
+            if (0 >= --privacy_timeout) {
+                privacy_accept();
+                return;
+            }
+            var privacy_accept_button = document.getElementById('privacy_accept');
+            if (null != privacy_accept_button) {
+                privacy_accept_button.innerHTML = 'Yes (' + privacy_timeout + ')';
+                privacy_timer = setTimeout('privacy_tick()', 1000);
+            }
+        }
+
+        function privacy_accept() {
+            clearTimeout(privacy_timer);
+            document.cookie = 'mallon_privacy=1; path=/; expires=Mon, 18 Jan 2038 03:14:00 GMT';
+            if (mallon_privacy != null && mallon_privacy.parentNode != null)
+                mallon_privacy.parentNode.removeChild(mallon_privacy);
+            for (var i = 0; i < privacy_functions.length; i++) {
+                privacy_functions[i]();
+            }
+        }
+
+
+
+        function OnLoggingOut() {
+            // If we have EscapeAttributeLayerString function available that means we have a map definition control available.  IF this is the the case
+            // then logging out should decode the attribution string.  We have to do that or we can't do a postback because of unsafe string containing html
+            // code
+            if (typeof EscapeAttributeLayerString === "function") {
+                EscapeAttributeLayerString();
+            }
+        }
+
+    $(document).ready(function () {
+            aziMap.init();
+
+            // Pressing Enter does not submit form
+            $(window).keydown(function (event) {
+                if (event.keyCode == 13 && $('#SQLEditor').hasClass("ace_focus") == false) {
+                    event.preventDefault();
+                    return false;
+                }
+            });
+
+            $(window).scroll(function () {
+                RepositionSaveDialoguePopup();
+            })
+            RemoveScrollBarFromMap();
+            FixHeaderForIE();
+        })
+
+        function RemoveScrollBarFromMap() {
+            var lowerURL = window.document.URL.toLocaleLowerCase();
+            if ((lowerURL.indexOf("iframedefault") >= 0) || (lowerURL.indexOf("publicpages/default.aspx") >= 0) || (lowerURL.indexOf("default.aspx") >= 0)) {
+                document.getElementsByTagName("body")[0].style.overflow = "hidden";
+            }
+        }
+
+        function $$(id, context) {
+            var el = $("#" + id, context);
+            if (el.length < 1) {
+                el = $("[id$=_" + id + "]", context);
+            }
+            return el;
+        }
+
+        function HideHelpDeskBtn() {
+            var btn = $("#helpDeskBtn");
+            btn.addClass('setMenuHeaderToHidden');
+        }
+
+        function HideAdminBtn() {
+            var btn = $("#adminBtn");
+            btn.addClass('setMenuHeaderToHidden');
+        }
+
+    </script>
+
+
+
+
+
+
+    <script type="text/javascript" charset="utf-8">
+
+        var ShowLoadingAnimationCount = 0;
+
+        function pageLoad() {
+
+            $('.title').unbind('click');
+
+            $('.title').click(function () {
+                $this = $(this);
+
+                if ($this.attr("NoToggle") == null) {
+                    $this.next().slideToggle('fast');
+                }
+            });
+
+            var $example = $('#example');
+            if ($example.length > 0) {
+                $example.dataTable({
+                    "sPaginationType": "full_numbers"
+                    , "bRetrieve": true
+                    , "bStateSave": true
+                    , "iDisplayLength": 25
+                    , "responsive": false
+                    , "aoColumnDefs": [
+                        { "aTargets": [0], "bSortable": false }
+                        , { "aTargets": [-1], "bSortable": false }
+                        , { responsivePriority: 1, targets: 0 }
+                        , { responsivePriority: 1, targets: 2 }
+                        , { responsivePriority: 2, targets: 3 }
+                        , { responsivePriority: 1, targets: -1 }
+                    ]
+                    , "fnDrawCallback": function () {
+                        $('#example_filter input').addClass('form-control form-control-PRNone');
+                        $('#example_length select').addClass('form-control form-control-PRNone');
+                    }
+                    , "initComplete": function () {
+                        $('#example_filter input').parent().wrap($('#form1')).parent().attr('autocomplete', 'off');
+                    }
+                });
+            }
+
+            // set disabled text/ddl inputs style to form-control
+            var inputs = $('input[type="text"]:disabled');
+            for (var i = 0; i < inputs.length; i++) {
+                $(inputs[i]).addClass('form-control');
+            }
+            inputs = $('select:disabled');
+            for (var i = 0; i < inputs.length; i++) {
+                $(inputs[i]).addClass('form-control');
+            }
+
+            //Reinit tooltips
+            $('[role="tooltip"]').remove();
+            setTimeout(function () {
+                $("[data-toggle=tooltip").tooltip()
+            }, 1000
+            );
+
+
+
+        }
+
+        $(window).on('resize', function () {
+            resizeDataTables();
+            // change log out to log in etc
+            if (window.outerWidth < 970) {
+                var loggedInStatus = "<img src='/images/Logout.png'>Log Out";
+                var loggedOutStatus = "<img src='/images/Logout.png'>Log In";
+                if (divMobileLoginUser.innerHTML != "") {
+                    document.getElementById('LinkButton1').innerHTML = loggedInStatus;
+                } else {
+                    document.getElementById('LinkButton1').innerHTML = loggedOutStatus;
+                }
+            }
+        });
+
+        function resizeDataTables() {
+            var $example = $('#example');
+            if ($example.length >= 1) {
+                $example.fnAdjustColumnSizing();
+            }
+        }
+
+        //this function was created to fix JIRA ticket AZI-1152
+        function DoesSelectToolExist() {
+            if (typeof IfOnHighLightSelectToolOnToolbar != "undefined") {
+                IfOnHighLightSelectToolOnToolbar()
+            }
+        }
+    </script>
+
+    <div ID="eantics"></div>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            // Cookie setting script wrapper
+            var cookieScripts = function () {
+                // Internal javascript called
+                console.log("Running");
+
+
+            }
+
+            //$.cookiesDirective({
+            //    privacyPolicyUri: 'myprivacypolicy.html',
+            //    explicitConsent: false,
+            //    position: 'bottom',
+            //    scriptWrapper: cookieScripts,
+            //    cookieScripts: 'Google Analytics, My Stats Ultimate ',
+            //    backgroundColor: '#1e4964',
+            //    linkColor: '#ffffff'
+            //});
+        });
+    </script>
+
+
+    <div ID="pattern" class="pattern rndCorner" style="height:100%;">
+        <div class="c">
+            <div ID="Form1">
+
+                <script type="text/javascript">
+
+
+
+                    function ShowLoadingAnimation(show) {
+
+                        if (show) {
+                            //++ShowLoadingAnimationCount;
+                            NProgress.start();
+
+                        }
+                        else {
+                            NProgress.done();
+
+                        }
+                    }
+
+                    function BeginRequestHandler(sender, args) {
+
+                        if (args != null && args._postBackElement != null) {
+                            var value = args._postBackElement.value;
+                            if (value == "CreateNewSearch" ||
+                                value == "Basic Search" ||
+                                value == "Advanced Search")
+                                return;
+                        }
+
+                        // if g_LoadingPanelControl is declared then let that control handle when the AlertDiv shows.
+                        // This happens if we are viewing the map.
+                        if (window.g_LoadingPanelControl != null) {
+                            window.g_LoadingPanelControl.increaseCounter();
+                        }
+                        else {
+                            ShowLoadingAnimation(true);
+                        }
+                    }
+                    function EndRequestHandler(sender, args) {
+                        if (args != null && args._postBackElement != null) {
+                            var value = args._postBackElement.value;
+                            if (value == "CreateNewSearch" ||
+                                value == "Basic Search" ||
+                                value == "Advanced Search")
+                                return;
+                        }
+
+                        if (window.g_LoadingPanelControl != null) {
+                            window.g_LoadingPanelControl.decreaseCounter();
+                        }
+                        else {
+                            ShowLoadingAnimation(false);
+
+                        }
+                    }
+                </script>
+
+                <%--<asp:HiddenField ID="hfSessionID" />--%>
+
+
+
+                <div ID="pageWrap">
+                    <div ID="pageInnerWrap" class="push">
+                        <header class="push">
+
+                            <div class="inner-wrap">
+                                <%--<a id="logo" href="/Home.aspx"><img src="/images/logo_new.png" alt="Azi Map" /></a>    --%>
+                                <a ID="logo" href="/Home.aspx"><img ID="logosrc" src="/img/ApplicationLogo.png" width="173" alt="Azi Map" /></a>
+
+                                <div ID="accountname1" style="position:relative;float:right">
+                                    <div ID="divLogin" style="position:relative; margin-right:1px; margin-top:1%; float:right">
+                                        <%--changed right and top to margin right and top DMCQ 08042015--%>
+                                        <dot:AuthenticatedView>
+                                            <NotAuthenticatedTemplate>
+                                                <img src="/images/btn_login.png" alt="Login" />
+                                                <a href="~/Account/ILogin.aspx" ID="A3" title="Sign in with your account details">Login</a>
+
+
+                                                |<dot:LinkButton Visible="{{value: !isEnterprise}}" href="~/Account/IRegister.aspx" title="Sign up for your 30 days free trial"> Free Trial</dot:LinkButton>
+
+
+                                            </NotAuthenticatedTemplate>
+
+                                            <AuthenticatedTemplate>
+                                                <span class="bold"><a href="~/AdminPages/Admin.aspx" ID="A4" title="Click Me for Admin Section"><dot:Literal Text="{value: "Welcome " + UserName}"></dot:Literal></a></span>
+                                                <div class="text-right">
+                                                    <dot:LinkButton class="headerStayWhite" Text="{value: LogInLogOut}" Click="{command:  LogInOrLogOut()}"></dot:LinkButton>
+                                                </div>
+                                            </AuthenticatedTemplate>
+                                        </dot:AuthenticatedView>
+                                        
+                                           
+                                            <div ID="LogInInfo">
+                                                <div class="text-right">
+                                                    <dot:LinkButton class="headerStayWhite" href="{value:  FreeTrialDaysUrl}" Text="{value: FreeTrialDaysMsg}"></dot:LinkButton>
+                                                </div>
+                                            </div>
+
+
+                                    </div>
+
+
+
+                                    <ul ID="nav">
+                                        <li><dot:LinkButton href="{{value:baseUrl + "/MemberPages/customerMapPortal.aspx"}}" ID="btn-maps"><img src="/images/btn_maps.png" alt="Maps" />Maps</dot:LinkButton></li>
+                                        <li><dot:LinkButton Visible="{{value: isDigitisor}}" Enabled="{{value: isDigitisor}}" href="{{value:baseUrl + "MemberPages/customerDataStorePortal.aspx"}}" ID="btn-data"><img src="/images/btn_layers.png" alt="Data Catalog" />Data Catalog</dot:LinkButton></li>
+
+
+                                        <li ID="adminBtn"><dot:LinkButton Visible="{{value: isAdmin}}" Enabled="{{value: isAdmin}}" href="{{value:baseUrl + "/AdminPages/Admin.aspx"}}" ID="btn-admin"><img src="/images/btn_admin.png" alt="Admin" />Admin</dot:LinkButton></li>
+
+                                        <li><a href="https://docs.azimap.com" ID="btn-help" target="_blank"><img src="/images/HelpIcon32x32.png" alt="Guides" />Guides</a></li>
+
+                                        <li ID="helpDeskBtn"><dot:LinkButton Visible="{{value: isAdmin}}" Enabled="{{value: isAdmin}}" href="{value "https://helpdesk.azimap.com"}" target="_helpdesk" ID="Helpdesk" style="padding-left: 20px; padding-right: 20px;"><img src="/images/btn_helpdesk.png" alt="Helpdesk" />Helpdesk</dot:LinkButton></li>
+
+                                        <li><dot:LinkButton href="{{value:baseUrl + "/AdminSuper/AdminMenu.aspx"}}" ID="superadmin" Visible="{{value: isSuperAdmin}}" Enabled="{{value: isSuperAdmin}}"><img src="/images/btn_admin.png" alt="AdminMenu" />SiteAdmin</dot:LinkButton></li>
+
+
+                                    </ul>
+
+                                    <div ID="mobile-btn">
+                                        <img src="/images/menu_btn.png" alt="Menu Button" />
+                                    </div>
+
+
+
+                                </div>
+
+                            </div>
+                        </header>
+
+
+                        <div ID="OuterDiv" style="width: 100%; height: 100%;">
+                            <div ID="mainContent" class="main" style="background:white;margin-top:120px;">
+                                <dot:ContentPlaceHolder ID="MainContent" />
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div ID="mobile-nav-items">
+                        <div ID="logoContainerstyle">
+                            <a ID="logoNav" href="/Home.aspx" style="width: 120px;">
+                                <img src="/images/logo_new.png" alt="Azi Map" class="mobileLogoHeader">
+                            </a>
+                        </div>
+                        <div ID="divMobileLoginUser">
+                        </div>
+                        <ul ID="ulMenu">
+                        </ul>
+
+
+                        <div ID="divMobileLogin">
+
+                            <ul>
+                                <li ID="liLogout">
+                                    <dot:LinkButton Click="{{command:  LogInOrLogOut()}}">
+                                        <img src="{value: LogInLogOutImage}" />
+                                        {{value: LogInLogOut}}
+                                    </dot:LinkButton>
+                                    <%--<asp:LinkButton ID="LinkButton2" OnClick="ChangePassWord" Text="<img src='/images/Logout.png' />Change Password"></asp:LinkButton>--%>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+
+                <%--  NEW SCROLLING HEADER--%>
+
+
+
+            </div>
+        </div>
+    </div>
+
+
+    <div style="display: none;">
+        <div ID="saveDialogSingleFeature" title="Status">
+            <Label ID="popUpLabel" Text="Label"></Label>
+        </div>
+    </div>
+
+    <script type="text/javascript" charset="utf-8">
+        //var to;
+        //$().ready(function() {
+        //    to = setTimeout("TimedOut()", <%=timeout%>);
+        //});
+
+        //function TimedOut() {
+        //  $.post( " .. /refresh_session.aspx", null,
+        //            function(data) {
+        //            if(data.indexOf("success") !=-1) {
+        //            to=setTimeout("TimedOut()", <%=timeout%>);
+        //        }
+        //    });
+        //}
+
+
+        if (typeof Sys != "undefined" && Sys != null && Sys.WebForms != null && Sys.WebForms.PageRequestManager != null) {
+            var pm = Sys.WebForms.PageRequestManager.getInstance();
+
+            if (pm != null) {
+                pm.add_beginRequest(BeginRequestHandler);
+                pm.add_endRequest(EndRequestHandler);
+            }
+
+            Sys.WebForms.PageRequestManager.getInstance().add_endRequest(function () {
+                $('#HeadLoginStatus').off('click');
+                $("#HeadLoginStatus").click(function () {
+                    OnLoggingOut();
+                })
+            });
+        }
+
+
+
+
+    </script>
+
+</body>
+</html>
+
+
